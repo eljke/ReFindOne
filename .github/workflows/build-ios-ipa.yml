@@ -3,6 +3,15 @@ name: Build iOS IPA (LiveContainer)
 # Manual launch saves macOS minutes on private repositories.
 on:
   workflow_dispatch:
+    inputs:
+      publish_run:
+        description: 'Retry delivery from this run ID; its iPhone build and tests must have passed'
+        type: string
+        required: false
+      release_tag:
+        description: 'Existing release tag matching that run (for delivery retry only)'
+        type: string
+        required: false
   push:
     tags: ['v*']
 
@@ -11,6 +20,7 @@ permissions:
 
 jobs:
   build-unsigned-ipa:
+    if: inputs.publish_run == ''
     name: Xcode 27 / iPhoneOS / unsigned IPA
     runs-on: xcode-27
     timeout-minutes: 30
@@ -79,27 +89,49 @@ jobs:
 
   publish-release:
     name: Release and GitHub Package
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: >-
+      always() && !cancelled() &&
+      ((startsWith(github.ref, 'refs/tags/v') && needs['build-unsigned-ipa'].result == 'success') ||
+       (inputs.publish_run != '' && inputs.release_tag != ''))
     needs: build-unsigned-ipa
     runs-on: ubuntu-latest
     permissions:
       contents: write
       packages: write
+      actions: read
+    env:
+      RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+      SOURCE_RUN: ${{ inputs.publish_run || github.run_id }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
+      - name: Verify source run matches the tag and passed all build checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [[ "$SOURCE_RUN" =~ ^[0-9]+$ ]]
+          test "$RELEASE_TAG" = "v$(cat VERSION)"
+          SOURCE_SHA=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN" --jq .head_sha)
+          test "$SOURCE_SHA" = "$(git rev-parse HEAD)"
+          RESULT=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN/jobs" \
+            --jq '.jobs[] | select(.name == "Xcode 27 / iPhoneOS / unsigned IPA") | .conclusion')
+          test "$RESULT" = success
       - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
         with:
           name: ReFindOne-unsigned-iOS27
           path: build
+          run-id: ${{ inputs.publish_run || github.run_id }}
+          github-token: ${{ github.token }}
       - uses: oras-project/setup-oras@005458ad77f1c8facd38a094e4af2e69e5607ff4 # v2
         with:
-          version: 1.3.5
+          version: 1.3.0
       - name: Publish and verify versioned IPA package
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION=$(cat VERSION)
-          test "$GITHUB_REF_NAME" = "v$VERSION"
+          test "$RELEASE_TAG" = "v$VERSION"
           cd build
           FILE="ReFindOne-${VERSION}-unsigned.ipa"
           mv ReFindOne-unsigned.ipa "$FILE"
@@ -125,6 +157,6 @@ jobs:
           VERSION=$(cat VERSION)
           FLAGS=(--latest)
           if [[ "$VERSION" == *-* ]]; then FLAGS=(--prerelease --latest=false); fi
-          gh release create "$GITHUB_REF_NAME" --verify-tag \
+          gh release create "$RELEASE_TAG" --verify-tag \
             --title "ReFind One $VERSION" --notes-file CHANGELOG.md "${FLAGS[@]}" \
             "build/ReFindOne-${VERSION}-unsigned.ipa" build/SHA256SUMS.txt
