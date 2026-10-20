@@ -1,0 +1,41 @@
+name: Build iOS IPA (LiveContainer)
+
+# Manual launch saves macOS minutes on private repositories.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-unsigned-ipa:
+    name: Xcode 27 / iPhoneOS / unsigned IPA
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - name: Fetch sources
+        uses: actions/checkout@v4
+
+      - name: Display build environment
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Build for physical iPhone and package IPA
+        run: bash tools/build_unsigned_ipa_macos.sh
+
+      - name: Verify IPA structure and device architecture
+        run: python3 tools/verify_ipa.py build/ReFindOne-unsigned.ipa
+
+      - name: Compute SHA-256
+        run: shasum -a 256 build/ReFindOne-unsigned.ipa | tee build/SHA256.txt
+
+      - name: Publish unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReFindOne-unsigned-iOS27
+          path: |
+            build/ReFindOne-unsigned.ipa
+            build/SHA256.txt
+          if-no-files-found: error
+          retention-days: 14

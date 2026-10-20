@@ -1,0 +1,438 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+		4788AE0AEECAF2B36A826405 /* ReFindOneApp.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "ReFindOneApp.swift";
+			sourceTree = "<group>";
+		};
+		0688DC15EFFD1B8DE7E80FB7 /* ReFindOneApp.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 4788AE0AEECAF2B36A826405 /* ReFindOneApp.swift */;
+		};
+		75D94D7AA239BFEDF505E4D4 /* AppPaths.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "AppPaths.swift";
+			sourceTree = "<group>";
+		};
+		EFAC18640817C15C19BCABB5 /* AppPaths.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 75D94D7AA239BFEDF505E4D4 /* AppPaths.swift */;
+		};
+		F8A061791EDF1B421C4F74CE /* AttachmentStore.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "AttachmentStore.swift";
+			sourceTree = "<group>";
+		};
+		723A6074F5A6F3B839AF1972 /* AttachmentStore.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = F8A061791EDF1B421C4F74CE /* AttachmentStore.swift */;
+		};
+		D0FA6C925BBDBEB779BA1BD9 /* CaptureRepository.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "CaptureRepository.swift";
+			sourceTree = "<group>";
+		};
+		EB568ED98B39D78841BBBFC3 /* CaptureRepository.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = D0FA6C925BBDBEB779BA1BD9 /* CaptureRepository.swift */;
+		};
+		0C831CC92BFC7070E2526E34 /* SQLiteRepository.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "SQLiteRepository.swift";
+			sourceTree = "<group>";
+		};
+		F5C989E62C47C790B23DB868 /* SQLiteRepository.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 0C831CC92BFC7070E2526E34 /* SQLiteRepository.swift */;
+		};
+		49BA0F62C2C02D71A19DDCDF /* CaptureItem.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "CaptureItem.swift";
+			sourceTree = "<group>";
+		};
+		639FD6A78E204CBD180D0F84 /* CaptureItem.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 49BA0F62C2C02D71A19DDCDF /* CaptureItem.swift */;
+		};
+		C0965F90561AA06EEFDCC07F /* LinkNormalizer.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "LinkNormalizer.swift";
+			sourceTree = "<group>";
+		};
+		FE578745F9391ED9589192B3 /* LinkNormalizer.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = C0965F90561AA06EEFDCC07F /* LinkNormalizer.swift */;
+		};
+		D54935FA729D9ADB99BDBEB0 /* AppModel.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "AppModel.swift";
+			sourceTree = "<group>";
+		};
+		B7E164F99EA21307B78AF212 /* AppModel.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = D54935FA729D9ADB99BDBEB0 /* AppModel.swift */;
+		};
+		501AC03F9D8CECD06E9C9ED4 /* BackupService.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "BackupService.swift";
+			sourceTree = "<group>";
+		};
+		DE822AF2DA6F7F6C3C1AFB4E /* BackupService.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 501AC03F9D8CECD06E9C9ED4 /* BackupService.swift */;
+		};
+		FB5FD5BA4502416B6A105810 /* FileImportService.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "FileImportService.swift";
+			sourceTree = "<group>";
+		};
+		D3029A919F83B10687E0649B /* FileImportService.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = FB5FD5BA4502416B6A105810 /* FileImportService.swift */;
+		};
+		4B38297F17EB83AC43BF55C2 /* OCRService.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "OCRService.swift";
+			sourceTree = "<group>";
+		};
+		4EFC2DA1D7AE6A6ACA7F2AB4 /* OCRService.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 4B38297F17EB83AC43BF55C2 /* OCRService.swift */;
+		};
+		24F0EB07223F411988A6699B /* AddCaptureView.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "AddCaptureView.swift";
+			sourceTree = "<group>";
+		};
+		CCA14D421F1A92F95FFCD30C /* AddCaptureView.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 24F0EB07223F411988A6699B /* AddCaptureView.swift */;
+		};
+		B347087FA53D6580D7F781E1 /* CaptureDetailView.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "CaptureDetailView.swift";
+			sourceTree = "<group>";
+		};
+		81BD6E7B11B1197E5C8768C5 /* CaptureDetailView.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = B347087FA53D6580D7F781E1 /* CaptureDetailView.swift */;
+		};
+		53CCA8C1A5875D1530EC4798 /* LibraryView.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "LibraryView.swift";
+			sourceTree = "<group>";
+		};
+		C1870395B876B35F28A0E005 /* LibraryView.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 53CCA8C1A5875D1530EC4798 /* LibraryView.swift */;
+		};
+		963400D6D576B919A9CFAAF8 /* SettingsView.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "SettingsView.swift";
+			sourceTree = "<group>";
+		};
+		5A01B27C125D005DEB8BAEAE /* SettingsView.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 963400D6D576B919A9CFAAF8 /* SettingsView.swift */;
+		};
+		6ED5D1721FD63BB9FFDCF82A /* Assets.xcassets */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder.assetcatalog;
+			path = Assets.xcassets;
+			sourceTree = "<group>";
+		};
+		2D2E632D965A6FF3A71C5084 /* Assets.xcassets in Resources */ = {
+			isa = PBXBuildFile;
+			fileRef = 6ED5D1721FD63BB9FFDCF82A /* Assets.xcassets */;
+		};
+		020AA89E6930E3A15B2E4320 /* Info.plist */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = Info.plist;
+			sourceTree = "<group>";
+		};
+		CB1540A32EDD180A6E4D7318 /* ReFindOne.app */ = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.application;
+			includeInIndex = 0;
+			path = ReFindOne.app;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F58D46C147F5F7FE7261F523 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				4788AE0AEECAF2B36A826405 /* ReFindOneApp.swift */,
+			);
+			path = "App";
+			sourceTree = "<group>";
+		};
+		2C12DA72D2ED2D520F273F25 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				75D94D7AA239BFEDF505E4D4 /* AppPaths.swift */,
+				F8A061791EDF1B421C4F74CE /* AttachmentStore.swift */,
+				D0FA6C925BBDBEB779BA1BD9 /* CaptureRepository.swift */,
+				0C831CC92BFC7070E2526E34 /* SQLiteRepository.swift */,
+			);
+			path = "Data";
+			sourceTree = "<group>";
+		};
+		BDD11BDDD049640A7B5F09D0 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				49BA0F62C2C02D71A19DDCDF /* CaptureItem.swift */,
+				C0965F90561AA06EEFDCC07F /* LinkNormalizer.swift */,
+			);
+			path = "Domain";
+			sourceTree = "<group>";
+		};
+		3F9E7406B3C8CBCE6C8DD8E3 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				D54935FA729D9ADB99BDBEB0 /* AppModel.swift */,
+			);
+			path = "Presentation";
+			sourceTree = "<group>";
+		};
+		C9B9B08D4A16B3B14C49ECBE /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				501AC03F9D8CECD06E9C9ED4 /* BackupService.swift */,
+				FB5FD5BA4502416B6A105810 /* FileImportService.swift */,
+				4B38297F17EB83AC43BF55C2 /* OCRService.swift */,
+			);
+			path = "Services";
+			sourceTree = "<group>";
+		};
+		6F994E5F9CD1E434645AB8D6 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				24F0EB07223F411988A6699B /* AddCaptureView.swift */,
+				B347087FA53D6580D7F781E1 /* CaptureDetailView.swift */,
+				53CCA8C1A5875D1530EC4798 /* LibraryView.swift */,
+				963400D6D576B919A9CFAAF8 /* SettingsView.swift */,
+			);
+			path = "Views";
+			sourceTree = "<group>";
+		};
+		FC6CC8A640760437CF142729 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				6ED5D1721FD63BB9FFDCF82A /* Assets.xcassets */,
+				020AA89E6930E3A15B2E4320 /* Info.plist */,
+			);
+			sourceTree = "<group>";
+		};
+		2DFE02AA051EEAA7ABBC7AB2 /* ReFindOne */ = {
+			isa = PBXGroup;
+			children = (
+				F58D46C147F5F7FE7261F523 /* App */,
+				2C12DA72D2ED2D520F273F25 /* Data */,
+				BDD11BDDD049640A7B5F09D0 /* Domain */,
+				3F9E7406B3C8CBCE6C8DD8E3 /* Presentation */,
+				C9B9B08D4A16B3B14C49ECBE /* Services */,
+				6F994E5F9CD1E434645AB8D6 /* Views */,
+				6ED5D1721FD63BB9FFDCF82A /* Assets.xcassets */,
+				020AA89E6930E3A15B2E4320 /* Info.plist */,
+			);
+			path = ReFindOne;
+			sourceTree = "<group>";
+		};
+		6C46F26A025507DA7CF89C7F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CB1540A32EDD180A6E4D7318 /* app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		680081187F808F375C0B2395 /* Root */ = {
+			isa = PBXGroup;
+			children = (
+				2DFE02AA051EEAA7ABBC7AB2 /* app */,
+				6C46F26A025507DA7CF89C7F /* products */,
+			);
+			sourceTree = "<group>";
+		};
+		06792F93BFACE8B486294485 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0688DC15EFFD1B8DE7E80FB7 /* ReFindOneApp.swift */,
+				EFAC18640817C15C19BCABB5 /* AppPaths.swift */,
+				723A6074F5A6F3B839AF1972 /* AttachmentStore.swift */,
+				EB568ED98B39D78841BBBFC3 /* CaptureRepository.swift */,
+				F5C989E62C47C790B23DB868 /* SQLiteRepository.swift */,
+				639FD6A78E204CBD180D0F84 /* CaptureItem.swift */,
+				FE578745F9391ED9589192B3 /* LinkNormalizer.swift */,
+				B7E164F99EA21307B78AF212 /* AppModel.swift */,
+				DE822AF2DA6F7F6C3C1AFB4E /* BackupService.swift */,
+				D3029A919F83B10687E0649B /* FileImportService.swift */,
+				4EFC2DA1D7AE6A6ACA7F2AB4 /* OCRService.swift */,
+				CCA14D421F1A92F95FFCD30C /* AddCaptureView.swift */,
+				81BD6E7B11B1197E5C8768C5 /* CaptureDetailView.swift */,
+				C1870395B876B35F28A0E005 /* LibraryView.swift */,
+				5A01B27C125D005DEB8BAEAE /* SettingsView.swift */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		82CA47A353FA0A5836A69AC6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2D2E632D965A6FF3A71C5084 /* Assets.xcassets */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0ED4BD1A5C7C4B925044EA92 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		91FBC7041B3AC08F61648587 /* Project Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;
+			};
+			name = Debug;
+		};
+		8785E94EA2B077500409766E /* App Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.refind.one;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReFindOne/Info.plist;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				SWIFT_VERSION = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				MARKETING_VERSION = 0.2.0;
+				CURRENT_PROJECT_VERSION = 2;
+				CODE_SIGN_STYLE = Automatic;
+				OTHER_LDFLAGS = ("$(inherited)", "-lsqlite3");
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG";
+			};
+			name = Debug;
+		};
+		DC654A36A9B6534B7E3F8E21 /* Project Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;
+			};
+			name = Release;
+		};
+		0E6B230673EF3C37BBE1212E /* App Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.refind.one;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReFindOne/Info.plist;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				SWIFT_VERSION = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				MARKETING_VERSION = 0.2.0;
+				CURRENT_PROJECT_VERSION = 2;
+				CODE_SIGN_STYLE = Automatic;
+				OTHER_LDFLAGS = ("$(inherited)", "-lsqlite3");
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
+			};
+			name = Release;
+		};
+		848500F3D5A8DDF3515EDFBF /* project configs */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				91FBC7041B3AC08F61648587 /* Debug */,
+				DC654A36A9B6534B7E3F8E21 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8B32C25B4B95E73294C614AB /* target configs */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8785E94EA2B077500409766E /* Debug */,
+				0E6B230673EF3C37BBE1212E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		15EE70E4C56F0ECC5FB24E54 /* ReFindOne */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8B32C25B4B95E73294C614AB /* target */;
+			buildPhases = (
+				06792F93BFACE8B486294485 /* sources */,
+				0ED4BD1A5C7C4B925044EA92 /* frameworks */,
+				82CA47A353FA0A5836A69AC6 /* resources */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = ReFindOne;
+			productReference = CB1540A32EDD180A6E4D7318 /* app */;
+			productName = ReFindOne;
+			productType = "com.apple.product-type.application";
+		};
+		E28ACD689A2B1234C283BB6B /* Project */ = {
+			isa = PBXProject;
+			buildConfigurationList = 848500F3D5A8DDF3515EDFBF /* project */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = ru;
+			hasScannedForEncodings = 0;
+			knownRegions = (ru, en, Base);
+			mainGroup = 680081187F808F375C0B2395 /* root */;
+			productRefGroup = 6C46F26A025507DA7CF89C7F /* products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				15EE70E4C56F0ECC5FB24E54 /* app */,
+			);
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				TargetAttributes = { 15EE70E4C56F0ECC5FB24E54 = { CreatedOnToolsVersion = 16.0; }; };
+			};
+		};
+	};
+	rootObject = E28ACD689A2B1234C283BB6B /* project */;
+}
