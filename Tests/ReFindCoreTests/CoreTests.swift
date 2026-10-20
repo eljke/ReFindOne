@@ -70,13 +70,15 @@ extension CoreTests {
         let bytes = Data([0x89, 0x50, 0x4e, 0x47, 0x41, 0x42, 0x43])
         let name = try await sourceFiles.save(data: bytes, fileExtension: "png")
         let original = CaptureItem(kind: .image, title: "Заметки о поездах",
-                                   extractedText: "Станция Амстердам", attachmentFile: name)
+                                   extractedText: "Станция Амстердам", attachmentFile: name,
+                                   archivedAt: Date(timeIntervalSince1970: 1_000))
         try await sourceDB.upsert(original)
         let archive = try await BackupService().export(repository: sourceDB, attachments: sourceFiles)
         let count = try await BackupService().restore(archive, repository: targetDB, attachments: targetFiles)
         XCTAssertEqual(count, 1)
         let restored = try await targetDB.item(id: original.id)
         XCTAssertEqual(restored?.extractedText, original.extractedText)
+        XCTAssertEqual(restored?.archivedAt, original.archivedAt)
         let restoredName = try XCTUnwrap(restored?.attachmentFile)
         let restoredBytes = try await targetFiles.read(name: restoredName)
         XCTAssertEqual(restoredBytes, bytes)

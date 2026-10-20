@@ -15,5 +15,10 @@ This source repository is a checked-in starting point. Do **not** claim device c
 - [ ] Test backup error, invalid JSON, missing attachment, insufficient storage.
 - [ ] Run UI with largest Dynamic Type and VoiceOver; test dark/light mode.
 - [ ] Test memory and scroll performance for hundreds of records.
+- [ ] Upgrade an existing v0.2 database, check inbox, favorites, attachments and archive; keep an exported backup before first launch.
+- [ ] LiveContainer 3.8+ Share Extension: share a Safari page and a supported file to ReFind One with the guest stopped and already running.
+- [ ] Confirm incoming link, cancel a draft, share a duplicate link, and send another item while a draft is open.
+- [ ] Check search while the keyboard is visible, archive/favorite swipes, unsaved edit confirmation, and full attachment previews.
+- [ ] Confirm release tag, VERSION, GitHub Release, GHCR package and main all reference the intended version.
 - [ ] Warn user: backups unencrypted, LiveContainer guest sandboxes not mutually isolated.
 - [ ] Bump `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`; include SHA-256 and release notes.

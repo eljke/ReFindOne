@@ -38,7 +38,7 @@ if ($LASTEXITCODE -ne 0) { throw 'git add failed.' }
 & git diff --cached --quiet
 $hasChanges = $LASTEXITCODE -ne 0
 if ($hasChanges) {
-    & git commit -m 'Update ReFind One source and iOS build workflow'
+    & git commit -m 'chore: update ReFind One sources'
     if ($LASTEXITCODE -ne 0) { throw 'git commit failed.' }
 }
 

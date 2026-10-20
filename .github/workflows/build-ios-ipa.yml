@@ -106,6 +106,10 @@ jobs:
           sha256sum "$FILE" > SHA256SUMS.txt
           PACKAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
           printf '%s' "$GH_TOKEN" | oras login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          if oras manifest fetch "$PACKAGE:$VERSION" >/dev/null 2>&1; then
+            echo "Package version already exists; publish a new version instead." >&2
+            exit 1
+          fi
           oras push "$PACKAGE:$VERSION" \
             --artifact-type application/vnd.refindone.ios.package.v1 \
             --annotation "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \

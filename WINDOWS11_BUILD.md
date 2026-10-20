@@ -1,101 +1,59 @@
-# ReFind One → IPA с Windows 11 (без Mac)
+# Сборка ReFind One с Windows 11
 
-**Рабочая схема:** Windows 11 → GitHub → облачный Mac с Xcode 27 → неподписанная IPA → Files на iPhone → LiveContainer.
+Исходники редактируются на Windows. Настоящую iPhoneOS IPA собирает Xcode 27 в GitHub Actions. LiveContainer на iPhone обеспечивает свой поддерживаемый способ подписи гостевого приложения.
 
-Компилировать настоящий iOS ARM64 `.app` из SwiftUI/Apple Vision прямо Windows SDK не умеет. Облачный macOS-раннер GitHub Actions решает это без покупки Mac, без платного Apple Developer Program и без публикации в App Store. Уже установленный LiveContainer должен сам обеспечить поддерживаемый способ подписи гостевой IPA (обычно JIT-less); этот этап НЕ гарантирован без проверки на iPhone.
-
-## 1. Установить инструменты на Windows
-
-Открой **PowerShell** и выполни:
+## Подготовка
 
 ```powershell
 winget install --id Git.Git -e
 winget install --id GitHub.cli -e
-```
-
-Перезапусти PowerShell, чтобы обновился `PATH`. Создай аккаунт на https://github.com, если его нет. Выполни:
-
-```powershell
 gh auth login
 ```
 
-Выбери `GitHub.com`, `HTTPS`, вход через браузер. Настрой имя автора (можно GitHub no-reply email, если не хочешь показывать реальный адрес):
+Git должен содержать настоящее имя и email автора. Для этого проекта используется уже настроенная пользовательская идентичность. Не меняй bundle ID dev.refind.one при обычном обновлении.
+
+## Отправить изменения и проверить сборку
+
+Из корня проекта:
 
 ```powershell
-git config --global user.name "Your GitHub name"
-git config --global user.email "YOUR_ID+YOUR_USERNAME@users.noreply.github.com"
-```
-
-Вместо примера введи настоящий email из своих GitHub Settings → Emails либо настроенный GitHub no-reply адрес. Не указывай выдуманный GitHub ID.
-
-## 2. Опубликовать исходники
-
-Распакуй архив `ReFindOne_v0.2_Windows11_source.zip` **как папку проекта**, в которой находятся `ReFindOne.xcodeproj`, `Package.swift`, `tools`, `.github`.
-
-В PowerShell перейди в эту папку, например:
-
-```powershell
-cd "$HOME\Downloads\ReFindOne"
-```
-
-Затем:
-
-```powershell
+python tools/generate_xcodeproj.py
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\publish_windows.ps1
+gh workflow run build-ios-ipa.yml --ref main
 ```
 
-Скрипт создаёт **private** репозиторий (по умолчанию), делает коммит, загружает проект и выводит ссылку на сборку. Публичный репозиторий, для которого стандартные GitHub-hosted сборки бесплатны, можно создать только по явному выбору:
+Генератор нужен при добавлении Swift-файлов или изменении версии. Скрипт публикации по умолчанию создаёт приватный репозиторий, если origin ещё не настроен; при наличии origin отправляет текущую ветку.
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\publish_windows.ps1 -Visibility public
-```
+Workflow проверяет переносимое ядро, собирает ARM64 IPA для физического iPhone, запускает сценарий интерфейса на симуляторе iPhone 18 Pro Max, проверяет пакет и публикует артефакты. Для релизной ветки в команде укажи её вместо main.
 
-**Внимание:** `public` откроет исходники всему интернету. Никогда не публикуй пароли, ключи, сертификаты, личные данные, свою базу и резервные копии. Скрипт не загружает `.build`, `*.ipa`, секретные ключи, файлы сборки благодаря `.gitignore`, однако перед публикацией всё равно проверь содержимое.
+Артефакт ReFindOne-unsigned-iOS27 — внешний ZIP. Распакуй его: внутри настоящая ReFindOne-unsigned.ipa и SHA256.txt. Артефакт ReFindOne-interface содержит скриншоты UI-проверки.
 
-Если Windows заблокирует скрипт, можно выполнить Git-команды вручную в корне проекта:
+## Выпустить версию
 
-```powershell
-git init -b main
-git add -A
-git commit -m "Initial ReFind One"
-gh repo create ReFindOne --private --source . --remote origin --push
-```
+1. Создать release/X.Y.Z от актуального main.
+2. Выполнять законченные Conventional Commits: feat, fix, test, docs, ci, chore.
+3. Установить SemVer в VERSION, увеличить CURRENT_PROJECT_VERSION в tools/generate_xcodeproj.py и пересоздать проект.
+4. Обновить CHANGELOG.md и проверить сборку релизной ветки.
+5. Создать и отправить аннотированный тег v<VERSION>. Тег должен совпадать с VERSION.
+6. Дождаться зелёного workflow: он публикует GitHub Release, IPA, SHA256SUMS.txt и OCI-пакет ghcr.io/eljke/refindone:<VERSION>.
+7. После успешного выпуска влить релизную ветку в main и отправить main. Не перемещать опубликованный тег.
 
-## 3. Собрать IPA в браузере
+Суффикс -beta.N создаёт prerelease. Для исправления опубликованной версии выпускается новый номер.
 
-1. Открой в браузере свой репозиторий GitHub.
-2. Перейди **Actions → Build iOS IPA (LiveContainer)**.
-3. Нажми **Run workflow → Run workflow** (ветка `main`).
-4. После **зелёной** сборки открой её страницу.
-5. Внизу страницы, в блоке **Artifacts**, скачай `ReFindOne-unsigned-iOS27`.
-6. GitHub скачает внешний ZIP с двумя файлами. **Распакуй этот ZIP**, внутри будет настоящий `ReFindOne-unsigned.ipa` и `SHA256.txt`. Нельзя переименовывать внешний ZIP в IPA.
+## Установить или обновить на iPhone
 
-Workflow живёт в `.github/workflows/build-ios-ipa.yml`, запускается **вручную**, использует runner `xcode-27`, упаковывает iPhoneOS `.app` в `Payload/...`, проверяет наличие ARM64 Mach-O и публикует артефакт. Если Xcode компиляция завершится с ошибкой, workflow будет **красным** и IPA не выдаст: открой красный шаг и скопируй полный текст ошибки для исправления исходников.
+1. Перед обновлением экспортируй коллекцию в настройках ReFind One.
+2. В Safari открой https://github.com/eljke/ReFindOne/releases под своим GitHub-аккаунтом.
+3. Скачай IPA из нужного релиза в «Файлы». ZIP исходников не является приложением.
+4. LiveContainer → «+» → выбери IPA. Для обновления выбери замену текущего ReFind One и сохрани существующий контейнер.
+5. Проверь запуск, заметку, поиск, фото/OCR, PDF и сохранность данных после перезапуска.
 
-## 4. Импортировать на iPhone
+Переход 0.2 → 0.3 обновляет базу до v2. Для возврата к приложению 0.2 нужен отдельный контейнер и копия: старое приложение не открывает новую схему.
 
-1. Передай `ReFindOne-unsigned.ipa` в «Файлы» на iPhone (iCloud Drive, собственное облако или другой доверенный способ).
-2. Открой **официальный LiveContainer**, нажми `+` и выбери файл IPA.
-3. Убедись, что в LiveContainer настроен поддерживаемый JIT-less signing, как описано в его официальном FAQ. В зависимости от версии может понадобиться повторная подпись приложения в его настройках.
-4. Запусти ReFind One из LiveContainer. Если вылетает на iOS 27, проверь обновление LiveContainer и настройку `Spoof SDK Version` (для несовместимых сборок выключить).
-5. Протестируй сохранение ссылки, выход из приложения, повторный запуск, импорт скриншота и OCR.
+JIT-Less должен проходить [официальную диагностику](https://livecontainer.github.io/docs/faq/jit-less-mode-setup). Настройки совместимости зависят от версии LiveContainer; успешная сборка не гарантирует запуск на устройстве.
 
-Официальный LiveContainer: https://github.com/LiveContainer/LiveContainer ; FAQ: https://livecontainer.github.io/docs/faq/installing-livecontainer
+## Стоимость и данные
 
-## 5. Обновлять приложение с Windows
+В приватном репозитории Actions расходует включённые минуты. macOS-сборки запускаются вручную и по релизным тегам. В публичном репозитории стандартные runners бесплатны, но исходники становятся общедоступными. Приватность репозитория без отдельного решения не меняется.
 
-Измени `.swift` файлы в **Visual Studio Code** (или другом редакторе) → снова выполни `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\publish_windows.ps1` → вручную повтори **Actions → Run workflow** → получи новую IPA.
-
-Важное: не меняй `PRODUCT_BUNDLE_IDENTIFIER` без необходимости. Перед пробным обновлением сохрани резервную копию из ReFind One. LiveContainer имеет собственную модель контейнеров, и перезапись гостевой IPA может повлиять на доступность данных.
-
-## Стоимость и безопасность
-
-- В **публичном** репозитории стандартные GitHub-hosted runners бесплатны (в том числе macOS). Исходники видны всем.
-- В **приватном** репозитории macOS Actions расходует включённый лимит минут; превышение квоты может блокировать сборку или создавать расходы согласно настройкам биллинга GitHub. Поэтому workflow запускается только вручную.
-- Apple developer subscription не нужна **для получения неподписанной IPA** из облачного Xcode. Для обычной прямой установки на iPhone потребуется отдельная подпись; установленный LiveContainer при корректной настройке способен переподписывать гостевые приложения.
-- GitHub workflow не получает никаких сертификатов, паролей и Apple ID, а исходный код ReFind One не отправляет ваши заметки в облако. Локальные записи/скриншоты с телефона в Actions не загружаются.
-
-## Как понять, что уже проверено
-
-- Проверяются: Linux-unit-тесты ядра в отдельном workflow; структура IPA, bundle metadata, наличие ARM64 бинарника после успешного Xcode build.
-- **Не проверяется без iPhone:** запуск гостевой IPA, нативные разрешения, PhotosPicker/OCR, совместимость с конкретной сборкой LiveContainer, жизненный цикл и сохранность данных после обновления.
+GitHub не получает заметки, скриншоты или сертификаты с телефона. Копии JSON не зашифрованы; храните их самостоятельно.

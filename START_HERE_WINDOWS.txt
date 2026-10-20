@@ -1,4 +1,4 @@
-ReFind One v0.2 — запуск разработки на Windows 11, без Mac.
+ReFind One — запуск разработки на Windows 11, без Mac. Версия указана в VERSION.
 
 1) Прочитай WINDOWS11_BUILD.md (там полная пошаговая инструкция).
 2) Установи Git и GitHub CLI на ПК с Windows 11.
@@ -9,6 +9,7 @@ ReFind One v0.2 — запуск разработки на Windows 11, без Ma
 6) После успешной сборки скачай Artifacts и распакуй внешний ZIP.
 7) Передай внутренний ReFindOne-unsigned.ipa на iPhone и импортируй в LiveContainer.
 
-Важно: проект собирается в облаке GitHub под Xcode 27. Здесь на Linux проверены
-тесты и формат файлов, но Xcode-сборка в облаке и запуск на iPhone ещё не проверены.
+Готовые выпуски: https://github.com/eljke/ReFindOne/releases
+Проект собирается в облаке GitHub под Xcode 27, включая UI-тесты на симуляторе.
+Запуск новой версии в LiveContainer на физическом iPhone проверяется отдельно.
 При ошибке сборки пришли лог красного шага GitHub Actions для исправления.

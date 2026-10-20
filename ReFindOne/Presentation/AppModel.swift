@@ -16,7 +16,6 @@ final class AppModel: ObservableObject {
     @Published var alertMessage: String?
     @Published var infoMessage: String?
     @Published var captureDraft: CaptureDraft?
-    @Published private(set) var libraryNavigationID = UUID()
 
     private let paths: AppPaths?
     private let repository: (any CaptureRepository)?
@@ -114,7 +113,6 @@ final class AppModel: ObservableObject {
     func receiveSharedURL(_ url: URL) {
         do {
             sharedQueue.append(try SharedCapture.parse(url))
-            libraryNavigationID = UUID()
             presentNextShare()
         } catch { alertMessage = error.localizedDescription }
     }

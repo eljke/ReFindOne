@@ -144,42 +144,42 @@ private final class SQLiteDatabase {
         guard (0...2).contains(version) else { throw ReFindError.database("Неподдерживаемая версия базы: \(version)") }
         try execute("BEGIN IMMEDIATE")
         do {
-        try execute("""
-            CREATE TABLE IF NOT EXISTS captures (
-                id TEXT PRIMARY KEY NOT NULL,
-                kind TEXT NOT NULL,
-                title TEXT NOT NULL,
-                note TEXT NOT NULL,
-                extracted_text TEXT NOT NULL,
-                original_url TEXT,
-                normalized_url TEXT,
-                attachment_file TEXT,
-                created_at REAL NOT NULL,
-                updated_at REAL NOT NULL,
-                is_favorite INTEGER NOT NULL DEFAULT 0,
-                tags_json TEXT NOT NULL DEFAULT '[]'
-            )
-            """)
-        try execute("CREATE INDEX IF NOT EXISTS idx_captures_date ON captures(created_at DESC)")
-        try execute("CREATE INDEX IF NOT EXISTS idx_captures_url ON captures(normalized_url)")
-        if version < 2 { try execute("ALTER TABLE captures ADD COLUMN archived_at REAL") }
-        try execute("CREATE INDEX IF NOT EXISTS idx_captures_page ON captures(created_at DESC, id DESC)")
-        // iOS ships FTS5; on an unusual SQLite build fall back to escaped LIKE.
-        do {
-            try execute("CREATE VIRTUAL TABLE IF NOT EXISTS captures_fts USING fts5(id UNINDEXED, title, note, extracted_text, tags, tokenize='unicode61')")
-            ftsEnabled = true
-            if version < 2 {
-                try execute("DELETE FROM captures_fts")
-                try execute("""
-                    INSERT INTO captures_fts(id, title, note, extracted_text, tags)
-                    SELECT id, title, note, extracted_text, tags_json FROM captures
-                    """)
+            try execute("""
+                CREATE TABLE IF NOT EXISTS captures (
+                    id TEXT PRIMARY KEY NOT NULL,
+                    kind TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    note TEXT NOT NULL,
+                    extracted_text TEXT NOT NULL,
+                    original_url TEXT,
+                    normalized_url TEXT,
+                    attachment_file TEXT,
+                    created_at REAL NOT NULL,
+                    updated_at REAL NOT NULL,
+                    is_favorite INTEGER NOT NULL DEFAULT 0,
+                    tags_json TEXT NOT NULL DEFAULT '[]'
+                )
+                """)
+            try execute("CREATE INDEX IF NOT EXISTS idx_captures_date ON captures(created_at DESC)")
+            try execute("CREATE INDEX IF NOT EXISTS idx_captures_url ON captures(normalized_url)")
+            if version < 2 { try execute("ALTER TABLE captures ADD COLUMN archived_at REAL") }
+            try execute("CREATE INDEX IF NOT EXISTS idx_captures_page ON captures(created_at DESC, id DESC)")
+            // iOS ships FTS5; on an unusual SQLite build fall back to escaped LIKE.
+            do {
+                try execute("CREATE VIRTUAL TABLE IF NOT EXISTS captures_fts USING fts5(id UNINDEXED, title, note, extracted_text, tags, tokenize='unicode61')")
+                ftsEnabled = true
+                if version < 2 {
+                    try execute("DELETE FROM captures_fts")
+                    try execute("""
+                        INSERT INTO captures_fts(id, title, note, extracted_text, tags)
+                        SELECT id, title, note, extracted_text, tags_json FROM captures
+                        """)
+                }
+            } catch {
+                ftsEnabled = false
             }
-        } catch {
-            ftsEnabled = false
-        }
-        try execute("PRAGMA user_version=2")
-        try execute("COMMIT")
+            try execute("PRAGMA user_version=2")
+            try execute("COMMIT")
         } catch {
             try? execute("ROLLBACK")
             throw error

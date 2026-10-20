@@ -9,7 +9,6 @@ struct ReFindOneApp: App {
         WindowGroup {
             TabView(selection: $selectedTab) {
                 NavigationStack { LibraryView() }
-                    .id(model.libraryNavigationID)
                     .tabItem { Label("Библиотека", systemImage: "square.stack.3d.up") }
                     .tag(0)
                 NavigationStack { SettingsView() }
