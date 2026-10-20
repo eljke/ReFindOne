@@ -21,6 +21,7 @@ actor FileImportService {
         let size = (attributes[.size] as? NSNumber)?.intValue ?? 0
         guard size > 0 && size <= AttachmentStore.maxBytes else { throw ReFindError.fileTooLarge }
         let data = try Data(contentsOf: url)
+        guard data.count <= AttachmentStore.maxBytes else { throw ReFindError.fileTooLarge }
         let title = url.deletingPathExtension().lastPathComponent
 
         switch extensionName {
@@ -36,5 +37,16 @@ actor FileImportService {
             return .pdf(data, extractedText: content, title: title)
         default: throw ReFindError.unsupportedFile
         }
+    }
+
+    func stageBackup(from url: URL) throws -> URL {
+        let access = url.startAccessingSecurityScopedResource()
+        defer { if access { url.stopAccessingSecurityScopedResource() } }
+        let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+        guard size > 0 && size <= BackupService.maxBytes else { throw ReFindError.backupTooLarge }
+        let destination = FileManager.default.temporaryDirectory
+            .appendingPathComponent("refind-import-\(UUID().uuidString).json")
+        try FileManager.default.copyItem(at: url, to: destination)
+        return destination
     }
 }

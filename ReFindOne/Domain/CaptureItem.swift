@@ -42,6 +42,23 @@ struct CaptureItem: Codable, Identifiable, Equatable, Sendable {
 
     var isArchived: Bool { archivedAt != nil }
 
+    func snippet(matching query: String) -> String {
+        let sources = [note, extractedText, normalizedURL ?? originalURL ?? "", tags.joined(separator: ", ")]
+        let words = query.split(whereSeparator: \.isWhitespace).prefix(8).map(String.init)
+        for source in sources where !source.isEmpty {
+            for word in words {
+                if let match = source.range(of: word, options: [.caseInsensitive, .diacriticInsensitive]) {
+                    let start = source.index(match.lowerBound, offsetBy: -35, limitedBy: source.startIndex) ?? source.startIndex
+                    let end = source.index(start, offsetBy: 160, limitedBy: source.endIndex) ?? source.endIndex
+                    return (start == source.startIndex ? "" : "…") +
+                        source[start..<end].replacingOccurrences(of: "\n", with: " ") +
+                        (end == source.endIndex ? "" : "…")
+                }
+            }
+        }
+        return String((sources.first { !$0.isEmpty } ?? "").prefix(160)).replacingOccurrences(of: "\n", with: " ")
+    }
+
     init(id: UUID = UUID(), kind: CaptureKind, title: String,
          note: String = "", extractedText: String = "",
          originalURL: String? = nil, normalizedURL: String? = nil,

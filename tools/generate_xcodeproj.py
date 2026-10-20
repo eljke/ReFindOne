@@ -2,10 +2,13 @@
 """Deterministically regenerate the self-contained Xcode project. Requires Python 3."""
 from pathlib import Path
 import hashlib
+import re
 
 BASE=Path(__file__).resolve().parents[1]
 APP=BASE/'ReFindOne'
 SWIFT=sorted(APP.rglob('*.swift'))
+VERSION=(BASE/'VERSION').read_text().strip()
+assert re.fullmatch(r'(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?', VERSION), 'Invalid release version'
 assert len(SWIFT)>5
 
 def ident(name):
@@ -74,8 +77,9 @@ for mode in ['Debug','Release']:
         '\tIPHONEOS_DEPLOYMENT_TARGET = 17.0;',
         '\tSUPPORTED_PLATFORMS = "iphoneos iphonesimulator";',
         '\tTARGETED_DEVICE_FAMILY = "1,2";',
-        '\tMARKETING_VERSION = 0.2.0;',
-        '\tCURRENT_PROJECT_VERSION = 2;',
+        f'\tMARKETING_VERSION = {VERSION.split("-")[0]};',
+        f'\tREFIND_RELEASE_VERSION = {q(VERSION)};',
+        '\tCURRENT_PROJECT_VERSION = 3;',
         '\tCODE_SIGN_STYLE = Automatic;',
         '\tOTHER_LDFLAGS = ("$(inherited)", "-lsqlite3");',
         f'\tSWIFT_ACTIVE_COMPILATION_CONDITIONS = {q("DEBUG" if mode=="Debug" else "")};',
@@ -101,5 +105,5 @@ obj('project',['isa = PBXProject;', f'buildConfigurationList = {ref("configlist/
 project='// !$*UTF8*$!\n{\n\tarchiveVersion = 1;\n\tclasses = {};\n\tobjectVersion = 56;\n\tobjects = {\n'
 project+=''.join(objects)+'\t};\n'+f'\trootObject = {ref("project")};\n'+'}\n'
 output=BASE/'ReFindOne.xcodeproj'/'project.pbxproj'
-output.write_text(project)
+output.write_text(project, newline='\n')
 print(f'Created {output} with {len(SWIFT)} Swift files')

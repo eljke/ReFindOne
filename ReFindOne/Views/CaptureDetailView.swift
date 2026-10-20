@@ -1,6 +1,6 @@
 import SwiftUI
 import UIKit
-import PDFKit
+import QuickLook
 
 struct CaptureDetailView: View {
     @EnvironmentObject private var model: AppModel
@@ -11,12 +11,18 @@ struct CaptureDetailView: View {
     @State private var note: String
     @State private var tags: String
     @State private var showDeleteConfirmation = false
+    @State private var showDiscardConfirmation = false
+    @State private var previewURL: URL?
 
     init(item: CaptureItem) {
         _item = State(initialValue: item)
         _title = State(initialValue: item.title)
         _note = State(initialValue: item.note)
         _tags = State(initialValue: item.tags.joined(separator: ", "))
+    }
+
+    private var hasChanges: Bool {
+        title != item.title || note != item.note || tags != item.tags.joined(separator: ", ")
     }
 
     /// System data detector. Never accesses the network automatically.
@@ -45,12 +51,12 @@ struct CaptureDetailView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(item.kind.title).font(.caption).foregroundStyle(.secondary)
                         Text(item.createdAt, style: .date).font(.footnote).foregroundStyle(.secondary)
+                        if item.isArchived { Label("В архиве", systemImage: "archivebox").font(.caption) }
                     }
                     Spacer()
                     Button {
                         Task {
-                            await model.toggleFavorite(item)
-                            item.isFavorite.toggle()
+                            if let updated = await model.toggleFavorite(item) { item = updated }
                         }
                     } label: {
                         Image(systemName: item.isFavorite ? "star.fill" : "star")
@@ -58,26 +64,30 @@ struct CaptureDetailView: View {
                             .foregroundStyle(item.isFavorite ? .orange : .secondary)
                     }
                     .accessibilityLabel(item.isFavorite ? "Убрать из избранного" : "В избранное")
+                    .accessibilityIdentifier("favoriteCapture")
+                    .disabled(model.isBusy)
                 }
                 TextField("Название", text: $title)
                     .font(.headline)
+                    .accessibilityIdentifier("captureTitle")
             }
 
             if let path = model.attachmentURL(for: item) {
                 Section("Вложение") {
-                    if item.kind == .image, let picture = UIImage(contentsOfFile: path.path) {
-                        Image(uiImage: picture)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity)
-                            .accessibilityLabel("Импортированное изображение")
-                    } else if item.kind == .document {
-                        HStack(spacing: 10) {
-                            Image(systemName: "doc.richtext").font(.title3)
-                            Text("PDF-файл").font(.subheadline)
-                            Spacer()
+                    Button { previewURL = path } label: {
+                        if item.kind == .image {
+                            VStack(spacing: 8) {
+                                AttachmentThumbnail(url: path).frame(maxWidth: .infinity, maxHeight: 260)
+                                Label("Открыть изображение", systemImage: "arrow.up.left.and.arrow.down.right")
+                                    .font(.subheadline)
+                            }
+                        } else {
+                            Label("Читать PDF", systemImage: "doc.richtext")
+                                .frame(minHeight: 44)
                         }
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("previewAttachment")
                     ShareLink(item: path) { Label("Поделиться файлом", systemImage: "square.and.arrow.up") }
                 }
             }
@@ -96,6 +106,9 @@ struct CaptureDetailView: View {
                             UIPasteboard.general.string = cleaned
                             model.infoMessage = "Ссылка скопирована"
                         } label: { Label("Скопировать ссылку без трекеров", systemImage: "link") }
+                        if let cleanURL = LinkNormalizer.parse(cleaned) {
+                            ShareLink(item: cleanURL) { Label("Поделиться ссылкой", systemImage: "square.and.arrow.up") }
+                        }
                     }
                 }
             }
@@ -128,8 +141,12 @@ struct CaptureDetailView: View {
 
             Section("Твои заметки") {
                 TextEditor(text: $note)
-                    .frame(minHeight: 110)
+                    .frame(minHeight: 150)
                     .accessibilityLabel("Заметки к материалу")
+                    .accessibilityIdentifier("captureNote")
+                if item.kind == .note, !note.isEmpty {
+                    ShareLink(item: note) { Label("Поделиться текстом", systemImage: "square.and.arrow.up") }
+                }
             }
             Section {
                 TextField("например: рецепты, посмотреть, идеи", text: $tags)
@@ -138,14 +155,33 @@ struct CaptureDetailView: View {
             } header: { Text("Теги через запятую") }
               footer: { Text("Теги участвуют в поиске.") }
             Section {
+                Button {
+                    Task {
+                        if let updated = await model.setArchived(item, archived: !item.isArchived) { item = updated }
+                    }
+                } label: {
+                    Label(item.isArchived ? "Вернуть во входящие" : "Переместить в архив",
+                          systemImage: item.isArchived ? "tray.and.arrow.down" : "archivebox")
+                }
+                .accessibilityIdentifier("archiveCapture")
+                .disabled(model.isBusy)
                 Button(role: .destructive) { showDeleteConfirmation = true } label: {
                     Label("Удалить запись", systemImage: "trash")
                 }
+                .disabled(model.isBusy)
             }
         }
         .navigationTitle("Материал")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(hasChanges)
+        .scrollDismissesKeyboard(.interactively)
+        .quickLookPreview($previewURL)
         .toolbar {
+            if hasChanges {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Отмена") { showDiscardConfirmation = true }.disabled(model.isBusy)
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Сохранить") {
                     Task {
@@ -155,6 +191,8 @@ struct CaptureDetailView: View {
                     }
                 }
                 .fontWeight(.semibold)
+                .disabled(!hasChanges || model.isBusy || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .accessibilityIdentifier("saveCapture")
             }
         }
         .confirmationDialog("Удалить этот материал?", isPresented: $showDeleteConfirmation,
@@ -164,6 +202,14 @@ struct CaptureDetailView: View {
             }
         } message: {
             Text("Восстановить его можно будет только из резервной копии.")
+        }
+        .confirmationDialog("Сохранить изменения?", isPresented: $showDiscardConfirmation, titleVisibility: .visible) {
+            Button("Сохранить") {
+                Task {
+                    if await model.saveChanges(item, title: title, note: note, tagsText: tags) { dismiss() }
+                }
+            }
+            Button("Выйти без сохранения", role: .destructive) { dismiss() }
         }
     }
 }

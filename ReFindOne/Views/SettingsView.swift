@@ -8,6 +8,7 @@ struct SettingsView: View {
     @State private var showingRestore = false
     @State private var showingRestoreConfirmation = false
     @State private var pendingRestoreURL: URL?
+    @AppStorage("lastBackupDate") private var lastBackupDate = 0.0
 
     var body: some View {
         Form {
@@ -19,6 +20,10 @@ struct SettingsView: View {
               footer: { Text("Важно: гостевые приложения в одном LiveContainer не полностью изолированы друг от друга. Не сохраняй сюда пароли и секретные документы.") }
 
             Section {
+                LabeledContent("Последняя сохранённая копия") {
+                    if lastBackupDate > 0 { Text(Date(timeIntervalSince1970: lastBackupDate), style: .date) }
+                    else { Text("Ещё не создана").foregroundStyle(.secondary) }
+                }
                 Button {
                     Task {
                         if let data = await model.makeBackup() {
@@ -38,15 +43,18 @@ struct SettingsView: View {
               }
 
             Section("О приложении") {
-                LabeledContent("Версия", value: "0.2.0 MVP")
-                LabeledContent("Платформа", value: "iOS 17+")
-                LabeledContent("Хранилище", value: "SQLite + FTS5")
-                LabeledContent("Разработано для", value: "LiveContainer / обычный iOS")
+                LabeledContent("Версия", value: Bundle.main.object(forInfoDictionaryKey: "ReFindReleaseVersion") as? String ?? "—")
+                if let url = URL(string: "https://github.com/eljke/ReFindOne/releases") {
+                    Link(destination: url) { Label("Версии и обновления", systemImage: "arrow.down.app") }
+                }
             }
             Section {
-                Text("Поиск работает по названиям, заметкам, тегам и тексту из импортированных изображений или PDF. Ссылки из других приложений вставляются вручную — расширение «Поделиться» для гостевой IPA не регистрируется.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                Label("Сохрани ссылку, текст, фото или файл. Новое появится во «Входящих».", systemImage: "1.circle")
+                Label("Ищи по началу слова: «помид» найдёт «помидоры». Поиск учитывает текст на фото и в PDF с текстовым слоем.", systemImage: "2.circle")
+                Label("Свайп вправо — избранное. Свайп влево — архив или удаление. В «Всё» виден и архив.", systemImage: "3.circle")
+                Label("Нажми на вложение в карточке, чтобы открыть фото или прочитать PDF.", systemImage: "4.circle")
+                Text("Файлы — до 20 МБ. Сканированные страницы PDF пока не распознаются. Перед обновлением сохрани резервную копию.")
+                    .font(.footnote).foregroundStyle(.secondary)
             } header: { Text("Как пользоваться") }
         }
         .navigationTitle("Настройки")
@@ -54,22 +62,21 @@ struct SettingsView: View {
                       document: exportDocument,
                       contentType: .json,
                       defaultFilename: "ReFindOne-Backup") { result in
-            if case let .failure(error) = result { model.alertMessage = error.localizedDescription }
+            switch result {
+            case .success: lastBackupDate = Date.now.timeIntervalSince1970
+            case .failure(let error): model.alertMessage = error.localizedDescription
+            }
+            exportDocument = nil
         }
         .fileImporter(isPresented: $showingRestore, allowedContentTypes: [.json]) { result in
             switch result {
             case .success(let url):
-                // Import picker URLs are temporary: copy before presenting confirmation.
-                let granted = url.startAccessingSecurityScopedResource()
-                defer { if granted { url.stopAccessingSecurityScopedResource() } }
-                do {
-                    let size = (try FileManager.default.attributesOfItem(atPath: url.path)[.size] as? NSNumber)?.intValue ?? 0
-                    guard size > 0 && size <= 250 * 1024 * 1024 else { throw ReFindError.fileTooLarge }
-                    let temp = FileManager.default.temporaryDirectory.appendingPathComponent("refind-import-\(UUID().uuidString).json")
-                    try FileManager.default.copyItem(at: url, to: temp)
-                    pendingRestoreURL = temp
-                    showingRestoreConfirmation = true
-                } catch { model.alertMessage = error.localizedDescription }
+                Task {
+                    if let temp = await model.stageBackup(from: url) {
+                        pendingRestoreURL = temp
+                        showingRestoreConfirmation = true
+                    }
+                }
             case .failure(let error): model.alertMessage = error.localizedDescription
             }
         }
@@ -77,10 +84,10 @@ struct SettingsView: View {
                             titleVisibility: .visible) {
             Button("Импортировать") {
                 guard let url = pendingRestoreURL else { return }
+                pendingRestoreURL = nil
                 Task {
                     await model.restoreBackup(from: url)
                     try? FileManager.default.removeItem(at: url)
-                    pendingRestoreURL = nil
                 }
             }
             Button("Отмена", role: .cancel) {
@@ -88,7 +95,7 @@ struct SettingsView: View {
                 pendingRestoreURL = nil
             }
         } message: {
-            Text("Добавятся только записи, которых ещё нет в библиотеке. Текущие данные останутся без изменений.")
+            Text("Добавятся только отсутствующие записи. При ошибке изменения отменяются. Текущие записи не заменяются.")
         }
     }
 }

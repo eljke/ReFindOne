@@ -104,6 +104,16 @@
 			isa = PBXBuildFile;
 			fileRef = FB5FD5BA4502416B6A105810 /* FileImportService.swift */;
 		};
+		5028D326B641A3AE7032D5C6 /* ImagePreviewService.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "ImagePreviewService.swift";
+			sourceTree = "<group>";
+		};
+		16CA92310B93B5ABBA3F9BF4 /* ImagePreviewService.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 5028D326B641A3AE7032D5C6 /* ImagePreviewService.swift */;
+		};
 		4B38297F17EB83AC43BF55C2 /* OCRService.swift */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -123,6 +133,16 @@
 		CCA14D421F1A92F95FFCD30C /* AddCaptureView.swift in Sources */ = {
 			isa = PBXBuildFile;
 			fileRef = 24F0EB07223F411988A6699B /* AddCaptureView.swift */;
+		};
+		B33A3B659393395943DD6DC2 /* AttachmentThumbnail.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "AttachmentThumbnail.swift";
+			sourceTree = "<group>";
+		};
+		310DBAD2EE64E4F4C318975C /* AttachmentThumbnail.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = B33A3B659393395943DD6DC2 /* AttachmentThumbnail.swift */;
 		};
 		B347087FA53D6580D7F781E1 /* CaptureDetailView.swift */ = {
 			isa = PBXFileReference;
@@ -218,6 +238,7 @@
 			children = (
 				501AC03F9D8CECD06E9C9ED4 /* BackupService.swift */,
 				FB5FD5BA4502416B6A105810 /* FileImportService.swift */,
+				5028D326B641A3AE7032D5C6 /* ImagePreviewService.swift */,
 				4B38297F17EB83AC43BF55C2 /* OCRService.swift */,
 			);
 			path = "Services";
@@ -227,6 +248,7 @@
 			isa = PBXGroup;
 			children = (
 				24F0EB07223F411988A6699B /* AddCaptureView.swift */,
+				B33A3B659393395943DD6DC2 /* AttachmentThumbnail.swift */,
 				B347087FA53D6580D7F781E1 /* CaptureDetailView.swift */,
 				53CCA8C1A5875D1530EC4798 /* LibraryView.swift */,
 				963400D6D576B919A9CFAAF8 /* SettingsView.swift */,
@@ -287,8 +309,10 @@
 				B7E164F99EA21307B78AF212 /* AppModel.swift */,
 				DE822AF2DA6F7F6C3C1AFB4E /* BackupService.swift */,
 				D3029A919F83B10687E0649B /* FileImportService.swift */,
+				16CA92310B93B5ABBA3F9BF4 /* ImagePreviewService.swift */,
 				4EFC2DA1D7AE6A6ACA7F2AB4 /* OCRService.swift */,
 				CCA14D421F1A92F95FFCD30C /* AddCaptureView.swift */,
+				310DBAD2EE64E4F4C318975C /* AttachmentThumbnail.swift */,
 				81BD6E7B11B1197E5C8768C5 /* CaptureDetailView.swift */,
 				C1870395B876B35F28A0E005 /* LibraryView.swift */,
 				5A01B27C125D005DEB8BAEAE /* SettingsView.swift */,
@@ -337,8 +361,9 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				MARKETING_VERSION = 0.2.0;
-				CURRENT_PROJECT_VERSION = 2;
+				MARKETING_VERSION = 0.3.0;
+				REFIND_RELEASE_VERSION = "0.3.0-beta.1";
+				CURRENT_PROJECT_VERSION = 3;
 				CODE_SIGN_STYLE = Automatic;
 				OTHER_LDFLAGS = ("$(inherited)", "-lsqlite3");
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG";
@@ -373,8 +398,9 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				MARKETING_VERSION = 0.2.0;
-				CURRENT_PROJECT_VERSION = 2;
+				MARKETING_VERSION = 0.3.0;
+				REFIND_RELEASE_VERSION = "0.3.0-beta.1";
+				CURRENT_PROJECT_VERSION = 3;
 				CODE_SIGN_STYLE = Automatic;
 				OTHER_LDFLAGS = ("$(inherited)", "-lsqlite3");
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";

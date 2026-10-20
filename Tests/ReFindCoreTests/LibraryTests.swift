@@ -7,6 +7,15 @@ import CSQLite
 @testable import ReFindCore
 
 final class LibraryTests: XCTestCase {
+    func testSnippetShowsMatchingOCRInsteadOfUnrelatedNote() {
+        let item = CaptureItem(kind: .image, title: "Рецепт", note: "Приготовить в выходные",
+            extractedText: String(repeating: "Начало текста. ", count: 30) + "Помидоры и базилик")
+        let snippet = item.snippet(matching: "помид")
+        XCTAssertTrue(snippet.contains("Помидоры"))
+        XCTAssertTrue(snippet.hasPrefix("…"))
+        XCTAssertLessThanOrEqual(snippet.count, 162)
+    }
+
     func testPrefixSearchAndArchiveFilters() async throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: dir) }

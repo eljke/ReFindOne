@@ -31,6 +31,7 @@ struct ReFindOneApp: App {
                         .background(.regularMaterial, in: Capsule())
                         .shadow(color: .black.opacity(0.1), radius: 12, y: 4)
                         .padding(.top, 6)
+                        .onTapGesture { model.infoMessage = nil }
                         .transition(.move(edge: .top).combined(with: .opacity))
                         .accessibilityAddTraits(.isStaticText)
                 }
@@ -39,7 +40,7 @@ struct ReFindOneApp: App {
                 if model.isBusy {
                     HStack(spacing: 10) {
                         ProgressView()
-                        Text("Обрабатываю материал…")
+                        Text(model.busyMessage)
                             .font(.footnote.weight(.medium))
                     }
                     .padding(.horizontal, 18)
