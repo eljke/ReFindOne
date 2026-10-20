@@ -14,6 +14,7 @@ let package = Package(
                           "Services/FileImportService.swift", "Services/ImagePreviewService.swift",
                           "Assets.xcassets", "Info.plist"],
                 sources: ["Domain/CaptureItem.swift", "Domain/LinkNormalizer.swift",
+                          "Domain/SharedCapture.swift",
                           "Data/CaptureRepository.swift", "Data/SQLiteRepository.swift",
                           "Data/AppPaths.swift", "Data/AttachmentStore.swift", "Services/BackupService.swift"]),
         .testTarget(name: "ReFindCoreTests", dependencies: ["ReFindCore"],

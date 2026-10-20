@@ -74,6 +74,16 @@
 			isa = PBXBuildFile;
 			fileRef = C0965F90561AA06EEFDCC07F /* LinkNormalizer.swift */;
 		};
+		1EA19990954FB3903487BD84 /* SharedCapture.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "SharedCapture.swift";
+			sourceTree = "<group>";
+		};
+		AA0AD2452F82966E91A7A0E0 /* SharedCapture.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 1EA19990954FB3903487BD84 /* SharedCapture.swift */;
+		};
 		D54935FA729D9ADB99BDBEB0 /* AppModel.swift */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -245,6 +255,7 @@
 			children = (
 				49BA0F62C2C02D71A19DDCDF /* CaptureItem.swift */,
 				C0965F90561AA06EEFDCC07F /* LinkNormalizer.swift */,
+				1EA19990954FB3903487BD84 /* SharedCapture.swift */,
 			);
 			path = "Domain";
 			sourceTree = "<group>";
@@ -332,6 +343,7 @@
 				F5C989E62C47C790B23DB868 /* SQLiteRepository.swift */,
 				639FD6A78E204CBD180D0F84 /* CaptureItem.swift */,
 				FE578745F9391ED9589192B3 /* LinkNormalizer.swift */,
+				AA0AD2452F82966E91A7A0E0 /* SharedCapture.swift */,
 				B7E164F99EA21307B78AF212 /* AppModel.swift */,
 				DE822AF2DA6F7F6C3C1AFB4E /* BackupService.swift */,
 				D3029A919F83B10687E0649B /* FileImportService.swift */,

@@ -172,6 +172,7 @@ struct CaptureDetailView: View {
             }
         }
         .navigationTitle("Материал")
+        .disabled(model.isBusy)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(hasChanges)
         .scrollDismissesKeyboard(.interactively)

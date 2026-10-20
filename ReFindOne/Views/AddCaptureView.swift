@@ -43,6 +43,7 @@ struct AddCaptureView: View {
                 }
             }
             .navigationTitle("Сохранить")
+            .disabled(model.isBusy)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

@@ -5,19 +5,20 @@ import UIKit
 
 struct LibraryView: View {
     @EnvironmentObject private var model: AppModel
-    @State private var showingAdd = false
     @State private var showingFiles = false
     @State private var photoSelection: PhotosPickerItem?
-    @State private var draft = ""
     @State private var pendingDelete: CaptureItem?
+    @State private var isSearching = false
 
     var body: some View {
         List {
             Section {
-                captureActions
+                if !isSearching && model.searchText.isEmpty {
+                    captureActions
                     .listRowInsets(EdgeInsets(top: 6, leading: 18, bottom: 12, trailing: 18))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
+                }
                 collections
                     .listRowInsets(EdgeInsets(top: 0, leading: 18, bottom: 4, trailing: 0))
                     .listRowBackground(Color.clear)
@@ -133,15 +134,15 @@ struct LibraryView: View {
                 } label: { Image(systemName: "arrow.up.arrow.down") }
                     .accessibilityLabel("Порядок записей")
                 Button {
-                    draft = ""
-                    showingAdd = true
+                    model.captureDraft = CaptureDraft(text: "")
                 } label: { Image(systemName: "plus") }
                     .accessibilityLabel("Добавить запись")
                     .accessibilityIdentifier("addCapture")
                     .disabled(model.isBusy)
             }
         }
-        .searchable(text: $model.searchText, placement: .navigationBarDrawer(displayMode: .always),
+        .searchable(text: $model.searchText, isPresented: $isSearching,
+                    placement: .navigationBarDrawer(displayMode: .always),
                     prompt: "Слово, тег или текст со скриншота")
         .task(id: model.filterSignature) {
             try? await Task.sleep(for: .milliseconds(180))
@@ -149,7 +150,6 @@ struct LibraryView: View {
             await model.reload()
         }
         .refreshable { await model.reload() }
-        .sheet(isPresented: $showingAdd) { AddCaptureView(initialText: draft) }
         .fileImporter(isPresented: $showingFiles, allowedContentTypes: [.image, .pdf, .plainText]) { result in
             switch result {
             case .success(let url): Task { await model.importFile(from: url) }
@@ -181,12 +181,10 @@ struct LibraryView: View {
                 .font(.subheadline).foregroundStyle(.secondary)
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 captureButton("Ссылка или текст", subtitle: "Идея, заметка, адрес", symbol: "square.and.pencil") {
-                    draft = ""
-                    showingAdd = true
+                    model.captureDraft = CaptureDraft(text: "")
                 }
                 captureButton("Из буфера", subtitle: "Вставить и сохранить", symbol: "doc.on.clipboard") {
-                    draft = UIPasteboard.general.string ?? ""
-                    showingAdd = true
+                    model.captureDraft = CaptureDraft(text: UIPasteboard.general.string ?? "")
                 }
                 PhotosPicker(selection: $photoSelection, matching: .images) {
                     captureLabel("Фото и скриншот", subtitle: "Распознаем текст", symbol: "text.viewfinder")
@@ -228,9 +226,9 @@ struct LibraryView: View {
                 ForEach(CaptureCollection.allCases) { collection in
                     let selected = model.collection == collection
                     Button { model.collection = collection } label: {
-                        Label(collection.title, systemImage: collection.symbol)
-                            .font(.subheadline.weight(selected ? .semibold : .regular))
-                            .padding(.horizontal, 14).frame(minHeight: 44)
+                        Text(collection.title)
+                            .font(.footnote.weight(selected ? .semibold : .regular))
+                            .padding(.horizontal, 12).frame(minHeight: 44)
                             .background(selected ? Color.accentColor : Color(uiColor: .secondarySystemGroupedBackground), in: Capsule())
                             .foregroundStyle(selected ? Color.white : Color.primary)
                     }

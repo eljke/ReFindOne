@@ -3,16 +3,34 @@ import SwiftUI
 @main
 struct ReFindOneApp: App {
     @StateObject private var model = AppModel()
+    @State private var selectedTab = 0
 
     var body: some Scene {
         WindowGroup {
-            TabView {
+            TabView(selection: $selectedTab) {
                 NavigationStack { LibraryView() }
+                    .id(model.libraryNavigationID)
                     .tabItem { Label("Библиотека", systemImage: "square.stack.3d.up") }
+                    .tag(0)
                 NavigationStack { SettingsView() }
                     .tabItem { Label("Настройки", systemImage: "gearshape") }
+                    .tag(1)
             }
             .environmentObject(model)
+            .sheet(item: $model.captureDraft, onDismiss: model.presentNextShare) { draft in
+                AddCaptureView(initialText: draft.text)
+                    .environmentObject(model)
+            }
+            .onOpenURL { url in
+                selectedTab = 0
+                model.receiveSharedURL(url)
+            }
+            .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                if let url = activity.webpageURL {
+                    selectedTab = 0
+                    model.receiveSharedURL(url)
+                }
+            }
             .tint(Color(red: 0.40, green: 0.35, blue: 0.91))
             .alert("ReFind One", isPresented: Binding(
                 get: { model.alertMessage != nil },

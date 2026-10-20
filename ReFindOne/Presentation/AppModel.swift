@@ -15,6 +15,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var canLoadMore = false
     @Published var alertMessage: String?
     @Published var infoMessage: String?
+    @Published var captureDraft: CaptureDraft?
+    @Published private(set) var libraryNavigationID = UUID()
 
     private let paths: AppPaths?
     private let repository: (any CaptureRepository)?
@@ -24,6 +26,8 @@ final class AppModel: ObservableObject {
     private let fileImportService = FileImportService()
     private let pageSize = 60
     private var searchGeneration = 0
+    private var sharedQueue: [SharedCapture] = []
+    private var processingShare = false
 
     init(repository injected: (any CaptureRepository)? = nil, storagePaths: AppPaths? = nil) {
         do {
@@ -58,6 +62,7 @@ final class AppModel: ObservableObject {
         guard let repository else { return }
         searchGeneration += 1
         let generation = searchGeneration
+        let signature = filterSignature
         let count = reset ? pageSize : max(pageSize, items.count)
         isLoading = true
         defer { if generation == searchGeneration { isLoading = false } }
@@ -65,11 +70,11 @@ final class AppModel: ObservableObject {
             let result = try await repository.list(query: searchText, kind: selectedKind,
                 favoritesOnly: collection == .favorites, archived: archivedFilter,
                 sort: sort, limit: count + 1, offset: 0)
-            guard generation == searchGeneration else { return }
+            guard generation == searchGeneration, signature == filterSignature else { return }
             items = Array(result.prefix(count))
             canLoadMore = result.count > count
         } catch {
-            if generation == searchGeneration {
+            if generation == searchGeneration, signature == filterSignature {
                 items = []
                 canLoadMore = false
                 alertMessage = error.localizedDescription
@@ -80,13 +85,14 @@ final class AppModel: ObservableObject {
     func loadMore() async {
         guard let repository, !isLoading, !isBusy, canLoadMore else { return }
         let generation = searchGeneration
+        let signature = filterSignature
         isLoading = true
         defer { if generation == searchGeneration { isLoading = false } }
         do {
             let result = try await repository.list(query: searchText, kind: selectedKind,
                 favoritesOnly: collection == .favorites, archived: archivedFilter,
                 sort: sort, limit: pageSize + 1, offset: items.count)
-            guard generation == searchGeneration else { return }
+            guard generation == searchGeneration, signature == filterSignature else { return }
             items += result.prefix(pageSize)
             canLoadMore = result.count > pageSize
         } catch { alertMessage = error.localizedDescription }
@@ -102,6 +108,29 @@ final class AppModel: ObservableObject {
     private func endWork() {
         isBusy = false
         busyMessage = ""
+        presentNextShare()
+    }
+
+    func receiveSharedURL(_ url: URL) {
+        do {
+            sharedQueue.append(try SharedCapture.parse(url))
+            libraryNavigationID = UUID()
+            presentNextShare()
+        } catch { alertMessage = error.localizedDescription }
+    }
+
+    func presentNextShare() {
+        guard !isBusy, !processingShare, captureDraft == nil, !sharedQueue.isEmpty else { return }
+        processingShare = true
+        let next = sharedQueue.removeFirst()
+        Task {
+            switch next {
+            case .text(let text): captureDraft = CaptureDraft(text: text)
+            case .file(let url): await importFile(from: url)
+            }
+            processingShare = false
+            presentNextShare()
+        }
     }
 
     private func showInbox() async {

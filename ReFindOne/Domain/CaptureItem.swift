@@ -120,6 +120,7 @@ enum ReFindError: LocalizedError, Sendable {
     case unavailable
     case captureNotFound
     case backupTooLarge
+    case unsupportedShare
 
     var errorDescription: String? {
         switch self {
@@ -132,6 +133,7 @@ enum ReFindError: LocalizedError, Sendable {
         case .unavailable: "Хранилище недоступно."
         case .captureNotFound: "Запись уже удалена. Вернись в библиотеку."
         case .backupTooLarge: "Размер резервной копии превышает 250 МБ."
+        case .unsupportedShare: "Этот материал не поддерживается. Передай HTTP-ссылку, изображение, PDF или TXT."
         }
     }
 }

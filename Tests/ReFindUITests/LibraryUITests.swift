@@ -2,6 +2,40 @@ import XCTest
 
 final class LibraryUITests: XCTestCase {
     @MainActor
+    func testIncomingLinkRequiresConfirmationAndAvoidsDuplicates() throws {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launch()
+        var parts = URLComponents()
+        parts.scheme = "refindone"
+        parts.host = "capture"
+        let sharedURL = "https://example.com/shared?id=7&utm_source=share"
+        parts.queryItems = [URLQueryItem(name: "text", value: sharedURL)]
+        let route = try XCTUnwrap(parts.url)
+        app.open(route)
+        let editor = app.textViews["newCaptureContent"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 10))
+        XCTAssertEqual(editor.value as? String, sharedURL)
+        app.buttons["Отмена"].tap()
+        XCTAssertFalse(app.buttons["capture.Shared from Safari"].exists)
+
+        app.terminate()
+        app.open(route)
+        let title = app.textFields["newCaptureTitle"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10))
+        title.tap()
+        title.typeText("Shared from Safari")
+        saveScreenshot("Incoming link")
+        app.buttons["createCapture"].tap()
+        XCTAssertTrue(app.buttons["capture.Shared from Safari"].waitForExistence(timeout: 10))
+        app.open(route)
+        XCTAssertTrue(app.buttons["createCapture"].waitForExistence(timeout: 10))
+        app.buttons["createCapture"].tap()
+        XCTAssertTrue(app.buttons["capture.Shared from Safari"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.buttons.matching(identifier: "capture.Shared from Safari").count, 1)
+    }
+
+    @MainActor
     func testSaveEditArchiveSearchAndRelaunch() throws {
         continueAfterFailure = false
         let app = XCUIApplication()
