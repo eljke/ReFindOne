@@ -38,13 +38,16 @@ struct CaptureItem: Codable, Identifiable, Equatable, Sendable {
     var updatedAt: Date
     var isFavorite: Bool
     var tags: [String]
+    var archivedAt: Date?
+
+    var isArchived: Bool { archivedAt != nil }
 
     init(id: UUID = UUID(), kind: CaptureKind, title: String,
          note: String = "", extractedText: String = "",
          originalURL: String? = nil, normalizedURL: String? = nil,
          attachmentFile: String? = nil, createdAt: Date = .now,
          updatedAt: Date = .now, isFavorite: Bool = false,
-         tags: [String] = []) {
+         tags: [String] = [], archivedAt: Date? = nil) {
         self.id = id
         self.kind = kind
         self.title = title
@@ -57,7 +60,37 @@ struct CaptureItem: Codable, Identifiable, Equatable, Sendable {
         self.updatedAt = updatedAt
         self.isFavorite = isFavorite
         self.tags = tags
+        self.archivedAt = archivedAt
     }
+}
+
+enum CaptureCollection: String, CaseIterable, Identifiable {
+    case inbox, favorites, archive, all
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .inbox: "Входящие"
+        case .favorites: "Избранное"
+        case .archive: "Архив"
+        case .all: "Всё"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .inbox: "tray"
+        case .favorites: "star"
+        case .archive: "archivebox"
+        case .all: "square.stack"
+        }
+    }
+}
+
+enum CaptureSort: String, CaseIterable, Identifiable, Sendable {
+    case newest, oldest
+    var id: String { rawValue }
+    var title: String { self == .newest ? "Сначала новые" : "Сначала старые" }
 }
 
 enum ReFindError: LocalizedError, Sendable {
@@ -68,6 +101,8 @@ enum ReFindError: LocalizedError, Sendable {
     case missingAttachment
     case database(String)
     case unavailable
+    case captureNotFound
+    case backupTooLarge
 
     var errorDescription: String? {
         switch self {
@@ -78,6 +113,8 @@ enum ReFindError: LocalizedError, Sendable {
         case .missingAttachment: "Файл вложения не найден."
         case .database(let message): "Ошибка базы данных: \(message)"
         case .unavailable: "Хранилище недоступно."
+        case .captureNotFound: "Запись уже удалена. Вернись в библиотеку."
+        case .backupTooLarge: "Размер резервной копии превышает 250 МБ."
         }
     }
 }

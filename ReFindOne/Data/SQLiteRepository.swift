@@ -13,7 +13,9 @@ actor SQLiteRepository: CaptureRepository {
         db = try SQLiteDatabase(url: url)
     }
 
-    func list(query: String = "", kind: CaptureKind? = nil, favoritesOnly: Bool = false) throws -> [CaptureItem] {
+    func list(query: String = "", kind: CaptureKind? = nil, favoritesOnly: Bool = false,
+              archived: Bool? = nil, sort: CaptureSort = .newest,
+              limit: Int = 60, offset: Int = 0) throws -> [CaptureItem] {
         var sql = "SELECT c.* FROM captures c"
         var filters: [String] = []
         var args: [SQLValue] = []
@@ -34,8 +36,11 @@ actor SQLiteRepository: CaptureRepository {
         }
         if let kind { filters.append("c.kind = ?"); args.append(.text(kind.rawValue)) }
         if favoritesOnly { filters.append("c.is_favorite = 1") }
+        if let archived { filters.append(archived ? "c.archived_at IS NOT NULL" : "c.archived_at IS NULL") }
         if !filters.isEmpty { sql += " WHERE " + filters.joined(separator: " AND ") }
-        sql += " ORDER BY c.created_at DESC LIMIT 250"
+        let direction = sort == .newest ? "DESC" : "ASC"
+        sql += " ORDER BY c.created_at \(direction), c.id \(direction) LIMIT ? OFFSET ?"
+        args += [.int(Int32(limit)), .int(Int32(offset))]
         return try db.selectCaptures(sql: sql, args: args)
     }
 
@@ -53,36 +58,43 @@ actor SQLiteRepository: CaptureRepository {
     }
 
     func upsert(_ capture: CaptureItem) throws {
-        try db.execute("BEGIN IMMEDIATE")
-        do {
-            try db.execute("""
-                INSERT INTO captures (id, kind, title, note, extracted_text, original_url,
-                  normalized_url, attachment_file, created_at, updated_at, is_favorite, tags_json)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(id) DO UPDATE SET kind=excluded.kind, title=excluded.title,
-                  note=excluded.note, extracted_text=excluded.extracted_text,
-                  original_url=excluded.original_url, normalized_url=excluded.normalized_url,
-                  attachment_file=excluded.attachment_file, updated_at=excluded.updated_at,
-                  is_favorite=excluded.is_favorite, tags_json=excluded.tags_json
-                """, args: [
-                    .text(capture.id.uuidString), .text(capture.kind.rawValue),
-                    .text(capture.title), .text(capture.note), .text(capture.extractedText),
-                    .nullable(capture.originalURL), .nullable(capture.normalizedURL),
-                    .nullable(capture.attachmentFile), .double(capture.createdAt.timeIntervalSince1970),
-                    .double(capture.updatedAt.timeIntervalSince1970), .int(capture.isFavorite ? 1 : 0),
-                    .text(String(data: try JSONEncoder().encode(capture.tags), encoding: .utf8) ?? "[]")
-                ])
-            if db.ftsEnabled {
-                try db.execute("DELETE FROM captures_fts WHERE id = ?", args: [.text(capture.id.uuidString)])
-                try db.execute("INSERT INTO captures_fts (id, title, note, extracted_text, tags) VALUES (?, ?, ?, ?, ?)", args: [
-                    .text(capture.id.uuidString), .text(capture.title), .text(capture.note),
-                    .text(capture.extractedText), .text(capture.tags.joined(separator: " "))
-                ])
+        try db.transaction { try db.writeCapture(capture) }
+    }
+
+    func insertMissing(_ captures: [CaptureItem]) throws -> Set<UUID> {
+        try db.transaction {
+            var inserted = Set<UUID>()
+            for capture in captures where try item(id: capture.id) == nil {
+                try db.writeCapture(capture)
+                inserted.insert(capture.id)
             }
-            try db.execute("COMMIT")
-        } catch {
-            try? db.execute("ROLLBACK")
-            throw error
+            return inserted
+        }
+    }
+
+    func toggleFavorite(id: UUID) throws -> CaptureItem {
+        try update(id: id) { $0.isFavorite.toggle() }
+    }
+
+    func setArchived(id: UUID, archived: Bool) throws -> CaptureItem {
+        try update(id: id) { $0.archivedAt = archived ? .now : nil }
+    }
+
+    func updateDetails(id: UUID, title: String, note: String, tags: [String]) throws -> CaptureItem {
+        try update(id: id) {
+            $0.title = title
+            $0.note = note
+            $0.tags = tags
+        }
+    }
+
+    private func update(id: UUID, change: (inout CaptureItem) -> Void) throws -> CaptureItem {
+        try db.transaction {
+            guard var capture = try item(id: id) else { throw ReFindError.captureNotFound }
+            change(&capture)
+            capture.updatedAt = .now
+            try db.writeCapture(capture)
+            return capture
         }
     }
 
@@ -100,16 +112,15 @@ actor SQLiteRepository: CaptureRepository {
 
     private static func ftsQuery(_ text: String) -> String {
         // Quote every token: avoids SQLite MATCH syntax injection and supports Cyrillic.
-        // Prefix matching is intentionally disabled for stable, predictable results.
         text.split(whereSeparator: { $0.isWhitespace || $0.isNewline })
             .prefix(8)
-            .map { "\"" + String($0.prefix(80)).replacingOccurrences(of: "\"", with: "\"\"") + "\"" }
+            .map { "\"" + String($0.prefix(80)).replacingOccurrences(of: "\"", with: "\"\"") + "\"*" }
             .joined(separator: " AND ")
     }
 }
 
 private enum SQLValue {
-    case text(String), nullable(String?), double(Double), int(Int32)
+    case text(String), nullable(String?), double(Double), nullableDouble(Double?), int(Int32)
 }
 
 private final class SQLiteDatabase {
@@ -130,7 +141,9 @@ private final class SQLiteDatabase {
         try execute("PRAGMA journal_mode=WAL")
         try execute("PRAGMA foreign_keys=ON")
         let version = Int(sqlite3_user_version())
-        guard version <= 1 else { throw ReFindError.database("Неподдерживаемая версия базы: \(version)") }
+        guard (0...2).contains(version) else { throw ReFindError.database("Неподдерживаемая версия базы: \(version)") }
+        try execute("BEGIN IMMEDIATE")
+        do {
         try execute("""
             CREATE TABLE IF NOT EXISTS captures (
                 id TEXT PRIMARY KEY NOT NULL,
@@ -149,11 +162,14 @@ private final class SQLiteDatabase {
             """)
         try execute("CREATE INDEX IF NOT EXISTS idx_captures_date ON captures(created_at DESC)")
         try execute("CREATE INDEX IF NOT EXISTS idx_captures_url ON captures(normalized_url)")
+        if version < 2 { try execute("ALTER TABLE captures ADD COLUMN archived_at REAL") }
+        try execute("CREATE INDEX IF NOT EXISTS idx_captures_page ON captures(created_at DESC, id DESC)")
         // iOS ships FTS5; on an unusual SQLite build fall back to escaped LIKE.
         do {
             try execute("CREATE VIRTUAL TABLE IF NOT EXISTS captures_fts USING fts5(id UNINDEXED, title, note, extracted_text, tags, tokenize='unicode61')")
             ftsEnabled = true
-            if version == 0 {
+            if version < 2 {
+                try execute("DELETE FROM captures_fts")
                 try execute("""
                     INSERT INTO captures_fts(id, title, note, extracted_text, tags)
                     SELECT id, title, note, extracted_text, tags_json FROM captures
@@ -162,10 +178,55 @@ private final class SQLiteDatabase {
         } catch {
             ftsEnabled = false
         }
-        try execute("PRAGMA user_version=1")
+        try execute("PRAGMA user_version=2")
+        try execute("COMMIT")
+        } catch {
+            try? execute("ROLLBACK")
+            throw error
+        }
     }
 
     deinit { if let handle { sqlite3_close(handle) } }
+
+    func transaction<T>(_ operation: () throws -> T) throws -> T {
+        try execute("BEGIN IMMEDIATE")
+        do {
+            let result = try operation()
+            try execute("COMMIT")
+            return result
+        } catch {
+            try? execute("ROLLBACK")
+            throw error
+        }
+    }
+
+    func writeCapture(_ capture: CaptureItem) throws {
+        try execute("""
+            INSERT INTO captures (id, kind, title, note, extracted_text, original_url,
+              normalized_url, attachment_file, created_at, updated_at, is_favorite, tags_json, archived_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET kind=excluded.kind, title=excluded.title,
+              note=excluded.note, extracted_text=excluded.extracted_text,
+              original_url=excluded.original_url, normalized_url=excluded.normalized_url,
+              attachment_file=excluded.attachment_file, updated_at=excluded.updated_at,
+              is_favorite=excluded.is_favorite, tags_json=excluded.tags_json, archived_at=excluded.archived_at
+            """, args: [
+                .text(capture.id.uuidString), .text(capture.kind.rawValue),
+                .text(capture.title), .text(capture.note), .text(capture.extractedText),
+                .nullable(capture.originalURL), .nullable(capture.normalizedURL),
+                .nullable(capture.attachmentFile), .double(capture.createdAt.timeIntervalSince1970),
+                .double(capture.updatedAt.timeIntervalSince1970), .int(capture.isFavorite ? 1 : 0),
+                .text(String(decoding: try JSONEncoder().encode(capture.tags), as: UTF8.self)),
+                .nullableDouble(capture.archivedAt?.timeIntervalSince1970)
+            ])
+        if ftsEnabled {
+            try execute("DELETE FROM captures_fts WHERE id = ?", args: [.text(capture.id.uuidString)])
+            try execute("INSERT INTO captures_fts (id, title, note, extracted_text, tags) VALUES (?, ?, ?, ?, ?)", args: [
+                .text(capture.id.uuidString), .text(capture.title), .text(capture.note),
+                .text(capture.extractedText), .text(capture.tags.joined(separator: " "))
+            ])
+        }
+    }
 
     private func sqlite3_user_version() -> Int32 {
         var statement: OpaquePointer?
@@ -207,7 +268,9 @@ private final class SQLiteDatabase {
                 attachmentFile: column(7),
                 createdAt: Date(timeIntervalSince1970: sqlite3_column_double(stmt, 8)),
                 updatedAt: Date(timeIntervalSince1970: sqlite3_column_double(stmt, 9)),
-                isFavorite: sqlite3_column_int(stmt, 10) == 1, tags: tags))
+                isFavorite: sqlite3_column_int(stmt, 10) == 1, tags: tags,
+                archivedAt: sqlite3_column_type(stmt, 12) == SQLITE_NULL ? nil :
+                    Date(timeIntervalSince1970: sqlite3_column_double(stmt, 12))))
         }
     }
 
@@ -226,6 +289,9 @@ private final class SQLiteDatabase {
                         result = text.withCString { sqlite3_bind_text(stmt, index, $0, -1, Self.transient) }
                     } else { result = sqlite3_bind_null(stmt, index) }
                 case .double(let number): result = sqlite3_bind_double(stmt, index, number)
+                case .nullableDouble(let number):
+                    if let number { result = sqlite3_bind_double(stmt, index, number) }
+                    else { result = sqlite3_bind_null(stmt, index) }
                 case .int(let number): result = sqlite3_bind_int(stmt, index, number)
                 }
                 guard result == SQLITE_OK else { throw error() }

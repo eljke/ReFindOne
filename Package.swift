@@ -11,7 +11,7 @@ let package = Package(
         .target(name: "ReFindCore", dependencies: ["CSQLite"],
                 path: "ReFindOne",
                 exclude: ["App", "Presentation", "Views", "Services/OCRService.swift",
-                          "Assets.xcassets", "Info.plist"],
+                          "Services/FileImportService.swift", "Assets.xcassets", "Info.plist"],
                 sources: ["Domain/CaptureItem.swift", "Domain/LinkNormalizer.swift",
                           "Data/CaptureRepository.swift", "Data/SQLiteRepository.swift",
                           "Data/AppPaths.swift", "Data/AttachmentStore.swift", "Services/BackupService.swift"]),

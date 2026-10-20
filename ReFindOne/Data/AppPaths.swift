@@ -24,10 +24,15 @@ struct AppPaths {
     }
 
     func attachmentURL(_ name: String) -> URL? {
+        guard Self.attachmentExtension(name) != nil else { return nil }
+        return attachments.appendingPathComponent(name, isDirectory: false)
+    }
+
+    static func attachmentExtension(_ name: String) -> String? {
         let components = name.split(separator: ".", omittingEmptySubsequences: false)
         guard components.count == 2,
               UUID(uuidString: String(components[0])) != nil,
               ["jpg", "png", "heic", "pdf"].contains(String(components[1])) else { return nil }
-        return attachments.appendingPathComponent(name, isDirectory: false)
+        return String(components[1])
     }
 }
