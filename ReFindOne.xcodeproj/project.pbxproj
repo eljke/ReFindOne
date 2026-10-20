@@ -174,6 +174,30 @@
 			isa = PBXBuildFile;
 			fileRef = 963400D6D576B919A9CFAAF8 /* SettingsView.swift */;
 		};
+		6719EE13FEAF5BE95C276D9D /* LibraryUITests.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "LibraryUITests.swift";
+			sourceTree = "<group>";
+		};
+		61981171F4DAEFAEEE2C19D6 /* LibraryUITests.swift in Sources */ = {
+			isa = PBXBuildFile;
+			fileRef = 6719EE13FEAF5BE95C276D9D /* LibraryUITests.swift */;
+		};
+		A31674C60C1EC8642B687569 /* ReFindUITests */ = {
+			isa = PBXGroup;
+			children = (
+				6719EE13FEAF5BE95C276D9D /* LibraryUITests.swift */,
+			);
+			path = Tests/ReFindUITests;
+			sourceTree = "<group>";
+		};
+		8520491B38BE0234452D7151 /* ReFindOneUITests.xctest */ = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.cfbundle;
+			path = ReFindOneUITests.xctest;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		6ED5D1721FD63BB9FFDCF82A /* Assets.xcassets */ = {
 			isa = PBXFileReference;
 			lastKnownFileType = folder.assetcatalog;
@@ -283,6 +307,7 @@
 			isa = PBXGroup;
 			children = (
 				CB1540A32EDD180A6E4D7318 /* app */,
+				8520491B38BE0234452D7151 /* uitests */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -291,6 +316,7 @@
 			isa = PBXGroup;
 			children = (
 				2DFE02AA051EEAA7ABBC7AB2 /* app */,
+				A31674C60C1EC8642B687569 /* uitests */,
 				6C46F26A025507DA7CF89C7F /* products */,
 			);
 			sourceTree = "<group>";
@@ -333,6 +359,27 @@
 			files = ();
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		194865F9AED1D8E2A30A3302 /* UI Test Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61981171F4DAEFAEEE2C19D6 /* LibraryUITests.swift */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F861516E24924036373056C8 /* UI Tests Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.refind.one.uitests;
+				GENERATE_INFOPLIST_FILE = YES;
+				TEST_TARGET_NAME = ReFindOne;
+				SWIFT_VERSION = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		91FBC7041B3AC08F61648587 /* Project Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -357,6 +404,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ReFindOne/Info.plist;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				SWIFT_VERSION = 5.0;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -369,6 +417,19 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG";
 			};
 			name = Debug;
+		};
+		121CAA3D3FED6CCFEBBEE73C /* UI Tests Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.refind.one.uitests;
+				GENERATE_INFOPLIST_FILE = YES;
+				TEST_TARGET_NAME = ReFindOne;
+				SWIFT_VERSION = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
 		};
 		DC654A36A9B6534B7E3F8E21 /* Project Release */ = {
 			isa = XCBuildConfiguration;
@@ -394,6 +455,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ReFindOne/Info.plist;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				SWIFT_VERSION = 5.0;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -425,6 +487,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		A4AB682705987F5FA4A084C5 /* uitests configs */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F861516E24924036373056C8 /* Debug */,
+				121CAA3D3FED6CCFEBBEE73C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		15EE70E4C56F0ECC5FB24E54 /* ReFindOne */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8B32C25B4B95E73294C614AB /* target */;
@@ -440,6 +511,33 @@
 			productName = ReFindOne;
 			productType = "com.apple.product-type.application";
 		};
+		5BC5FADAC9724EE8EB2659F0 /* app */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E28ACD689A2B1234C283BB6B /* project */;
+			proxyType = 1;
+			remoteGlobalIDString = 15EE70E4C56F0ECC5FB24E54;
+			remoteInfo = ReFindOne;
+		};
+		82B345FF49271F33EEFDFA62 /* app */ = {
+			isa = PBXTargetDependency;
+			target = 15EE70E4C56F0ECC5FB24E54 /* app */;
+			targetProxy = 5BC5FADAC9724EE8EB2659F0 /* app */;
+		};
+		3D860776A5D59020BEF8A41F /* ReFindOneUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A4AB682705987F5FA4A084C5 /* uitests */;
+			buildPhases = (
+				194865F9AED1D8E2A30A3302 /* uitests */,
+			);
+			buildRules = ();
+			dependencies = (
+				82B345FF49271F33EEFDFA62 /* app */,
+			);
+			name = ReFindOneUITests;
+			productReference = 8520491B38BE0234452D7151 /* uitests */;
+			productName = ReFindOneUITests;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		E28ACD689A2B1234C283BB6B /* Project */ = {
 			isa = PBXProject;
 			buildConfigurationList = 848500F3D5A8DDF3515EDFBF /* project */;
@@ -453,6 +551,7 @@
 			projectRoot = "";
 			targets = (
 				15EE70E4C56F0ECC5FB24E54 /* app */,
+				3D860776A5D59020BEF8A41F /* uitests */,
 			);
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;

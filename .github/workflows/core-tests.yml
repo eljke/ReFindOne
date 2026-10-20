@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     container: swift:6.2
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install SQLite headers
         run: apt-get update && apt-get install -y libsqlite3-dev
       - name: Run tests
