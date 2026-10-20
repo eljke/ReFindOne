@@ -51,7 +51,7 @@ struct SettingsView: View {
         }
         .navigationTitle("Настройки")
         .fileExporter(isPresented: $showingExport,
-                      document: $exportDocument,
+                      document: exportDocument,
                       contentType: .json,
                       defaultFilename: "ReFindOne-Backup") { result in
             if case let .failure(error) = result { model.alertMessage = error.localizedDescription }
